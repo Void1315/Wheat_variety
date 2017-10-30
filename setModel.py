@@ -1,4 +1,4 @@
-import nltk, pprint
+import nltk, pprint, random
 from Resistance import Resistance
 from ReadDb import MyLink
 
@@ -13,7 +13,6 @@ class SetModel:
 		通过构造函数，我们从数据库读出来这个字段数据，和ID 并把它们
 		变成一个list里面很多元祖，来生成特征集
 		"""
-
 	def get_list(self):
 		"""
 		:return: 我们返回特征集
@@ -44,13 +43,16 @@ class SetModel:
 if __name__ == "__main__":
 	the_obj = SetModel()
 	my_link = MyLink()
-	my_sql = "panicle_num,grain_num,ths_weight"
-	str_list = ["高感叶锈病", "中抗条锈病", "中抗叶枯病", "高抗叶枯病", "中感白粉病", "中抗白粉病"]
+	my_sql = "panicle_num,grain_num,ths_weight,protein,wet_gluten"
+	str_list = ["高感叶锈病","中感白粉病"]
 	list_ = []
 	for val in str_list:
 		my_list = my_link.get_cloud_with_id(my_sql, tuple(the_obj.get_ill_id(val)))
 		list_ += [(j, val) for j in my_list]
 
-	pprint.pprint(list_)
-	classifier = nltk.NaiveBayesClassifier.train(list_)
-	print(classifier.classify({'panicle_num': 47, 'grain_num': 47, 'ths_weight': 48}))
+	random.shuffle(list_)
+	pprint.pprint(list_[:5])
+	classifier = nltk.NaiveBayesClassifier.train(list_[5:])#生成分类器
+	print(nltk.classify.accuracy(classifier,list_[:5]))#评估分类器
+	# print(classifier.classify({'panicle_num': 47, 'grain_num': 47, 'ths_weight': 48}))
+	print(classifier.show_most_informative_features(5))#检查似然比

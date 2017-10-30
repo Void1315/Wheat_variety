@@ -1,5 +1,6 @@
 # coding=utf-8
 import re, jieba
+import jieba.posseg as pseg
 
 jieba.load_userdict("dict/dict_1.txt")
 
@@ -228,6 +229,41 @@ class Ecology_type:
                 list_.append(val)
         return list_.copy()
 
+def get_seed_nature_feature(str_):
+    """
+    此方法与get_tiler_nature_feature类似，不在赘述
+    :param str_:
+    :return:
+    """
+    flag_list = ['v','a']
+    words = pseg.cut(str_)
+    the_list = []
+    for word, flag in words:
+        if flag in flag_list:
+            the_list.append(word)
+    return the_list.copy()
+
+def get_tiler_nature_feature(str_):
+    """
+    此方法用于获取tiler_nature字段的特征，
+    falg_list列表中存放，我们所需的关键词词性，
+
+    :param str_: 一个tiler_nature字段的值
+    :return: 一个list，里面存放进行词性分割后获取的关系字
+    """
+
+    flag_list = ['b','a']
+    words = pseg.cut(str_)
+    the_list = []
+    for word, flag in words:
+        if flag in flag_list:
+            the_list.append(word)
+    return the_list.copy()
+
+
+def get_plant_type_feature(str_):
+    pass
+
 
 class Seed_nature:
     str_ = ""
@@ -246,9 +282,16 @@ if __name__ == "__main__":
 
     # print(the_obj.the_feature_dict)
 
-
     # the_obj_E = Ecology_type("属弱春性多穗型早熟品种，平均全生育期229.3天")
     # print(the_obj_E.get_ecology_feature())
 
-    the_obj = Seed_nature("幼苗直立，苗势壮，叶短宽、浓绿色，耐寒性较好")
-    the_obj.get_seed_feature()
+    # the_obj = Seed_nature("幼苗直立，苗势壮，叶短宽、浓绿色，耐寒性较好")
+    # the_obj.get_seed_feature()
+
+    # print(get_seed_nature_feature("幼苗半直立，叶色青绿，长势偏旺，冬季抗寒能力差"))
+
+    # print(get_tiler_nature_feature("分蘖力较弱，成穗率较高，成穗数中等。春季起身较早，两极分化较快，抽穗早。"))
+
+    words = pseg.cut("株型半松散")
+    for word, flag in words:
+        print('%s %s' % (word, flag))
