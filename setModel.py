@@ -43,7 +43,7 @@ class SetModel:
 if __name__ == "__main__":
 	the_obj = SetModel()
 	my_link = MyLink()
-	my_sql = "panicle_num,grain_num,ths_weight,protein,wet_gluten"
+	my_sql = "panicle_num,grain_num,ths_weight,protein,wet_gluten,ecology_type,seed_nature,tiler_nature"
 	str_list = ["高感叶锈病","中感白粉病"]
 	list_ = []
 	for val in str_list:
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 		list_ += [(j, val) for j in my_list]
 
 	random.shuffle(list_)
-	pprint.pprint(list_[:5])
+	# pprint.pprint(list_)
 	classifier = nltk.NaiveBayesClassifier.train(list_[5:])#生成分类器
 	print(nltk.classify.accuracy(classifier,list_[:5]))#评估分类器
 	# print(classifier.classify({'panicle_num': 47, 'grain_num': 47, 'ths_weight': 48}))

@@ -201,6 +201,17 @@ class Resistance:
         return self.the_feature_dict.copy()
 
 
+    def get_all_feature(self,field,str_):
+        if field == "ecology_type":
+            the_obj = Ecology_type(str_)
+            return ','.join(the_obj.get_ecology_feature())
+        elif field is "seed_nature":
+            return ','.join(get_seed_nature_feature(str_))
+        elif field is "tiler_nature":
+            return ','.join(get_tiler_nature_feature(str_))
+        return str_
+
+
 class Ecology_type:
     '''
         此类表示对ecology字段的分词，

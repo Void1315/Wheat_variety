@@ -1,6 +1,6 @@
 import pymysql, pprint
 import re
-
+from Resistance import Resistance
 
 def get_tuple(tuple_):
 	if len(tuple_) == 1 and type(tuple_[0]) == tuple:
@@ -49,21 +49,24 @@ class MyLink:
 		"""
 		arg = get_tuple(arg)
 		the_list = []
+		obj_resistance = Resistance()
 		the_sql = "SELECT " + cloud + " FROM wheat_attr WHERE id IN " + str(arg)
 		with self.link.cursor() as cursor:
 			if len(arg)==0:
-				return the_list;
+				return the_list
 			cursor.execute(the_sql)
 			result = cursor.fetchall()
 			for val in result:
-				the_list.append({v:k for v in cloud.split(",") for k in val})
+				the_list.append({v:obj_resistance.get_all_feature(v,k) for v,k in zip(cloud.split(","),val)})
 		return the_list
 
 
 if __name__ == "__main__":
-	the_obj = MyLink()
-	pprint.pprint(the_obj.get_cloud_with_id("weaken,powder", (23, 77)))
+	# the_obj = MyLink()
+	# pprint.pprint(the_obj.get_cloud_with_id("weaken,powder", (23, 77)))
 
+	list_ = {v:k for v,k in (range(5),"abcde")}
+	print(list_)
 # pattern = re.compile('[抗旱级别]+\d+[级]')
 # pattern = re.compile(r'抗旱+.+([0-9]级|[高|中|低]+等)')
 # str = '中感白粉病和纹枯病，高感条锈病，中抗叶锈病和叶枯病。2008年、2009两年度经洛阳农科院全生育期抗旱鉴定：3级，抗旱性中等'
