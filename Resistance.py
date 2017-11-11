@@ -55,7 +55,6 @@ def split_ill(str_, the_feature):
     the_str_ = str_.replace('、', "，" + the_feature)
     return the_str_.replace("和", "，" + the_feature)
 
-
 class Resistance:
     the_feature_dict = {
         "抗病性": "无",
@@ -205,12 +204,13 @@ class Resistance:
         if field == "ecology_type":
             the_obj = Ecology_type(str_)
             return ','.join(the_obj.get_ecology_feature())
-        elif field is "seed_nature":
+        elif field == "seed_nature":
             return ','.join(get_seed_nature_feature(str_))
-        elif field is "tiler_nature":
+        elif field == "tiler_nature":
             return ','.join(get_tiler_nature_feature(str_))
+        elif field == "spike_length":
+            return ','.join(get_spike_length_feature(str_))
         return str_
-
 
 class Ecology_type:
     '''
@@ -238,6 +238,7 @@ class Ecology_type:
                 list_.append(the_list[index + 1])
             if val.find("型") > 0:
                 list_.append(val)
+        if len(the_list) == 0:return [""]
         return list_.copy()
 
 def get_seed_nature_feature(str_):
@@ -252,6 +253,7 @@ def get_seed_nature_feature(str_):
     for word, flag in words:
         if flag in flag_list:
             the_list.append(word)
+    if len(the_list)==0:return [""]
     return the_list.copy()
 
 def get_tiler_nature_feature(str_):
@@ -269,11 +271,25 @@ def get_tiler_nature_feature(str_):
     for word, flag in words:
         if flag in flag_list:
             the_list.append(word)
+    if len(the_list)==0:return [""]
     return the_list.copy()
 
 
 def get_plant_type_feature(str_):
-    pass
+    flag_list = ['a']
+    words = pseg.cut(str_)
+    the_list = []
+    for word, flag in words:
+        if flag in flag_list:
+            the_list.append(word)
+    if len(the_list)==0:return [""]
+    return the_list.copy()
+
+def get_spike_length_feature(str_):
+    if str_ is None or len(str_)==0:
+        return [""]
+    the_list = [str_]
+    return the_list.copy()
 
 
 class Seed_nature:
@@ -303,6 +319,8 @@ if __name__ == "__main__":
 
     # print(get_tiler_nature_feature("分蘖力较弱，成穗率较高，成穗数中等。春季起身较早，两极分化较快，抽穗早。"))
 
-    words = pseg.cut("株型半松散")
+    # print(get_spike_length_feature("穗层厚，穗大码稀，穗匀。"))
+
+    words = pseg.cut("株型半松散，基部节间短，茎秆弹性好")
     for word, flag in words:
         print('%s %s' % (word, flag))
