@@ -64,9 +64,22 @@ class MyLink:
 if __name__ == "__main__":
 	# the_obj = MyLink()
 	# pprint.pprint(the_obj.get_cloud_with_id("weaken,powder", (23, 77)))
+	ill_list = []
+	the_obj = MyLink()
+	resistance_ = Resistance()
+	for id,val in the_obj.select_resistance():
+		resistance_.str_ = val
+		the_ill = resistance_.get_feature_dict()["抗病性"].replace(",","，")
 
-	list_ = {v:k for v,k in (range(5),"abcde")}
-	print(list_)
+		the_ill = the_ill.split("，")
+		if '中抗叶锈' in the_ill:
+			print(id)
+		for i in the_ill:
+			if i not in ill_list:
+				ill_list.append(i)
+	with open('一个.txt','a+',encoding='utf-8') as f:
+		for val in ill_list:
+			f.write(val+'\n')
 # pattern = re.compile('[抗旱级别]+\d+[级]')
 # pattern = re.compile(r'抗旱+.+([0-9]级|[高|中|低]+等)')
 # str = '中感白粉病和纹枯病，高感条锈病，中抗叶锈病和叶枯病。2008年、2009两年度经洛阳农科院全生育期抗旱鉴定：3级，抗旱性中等'
