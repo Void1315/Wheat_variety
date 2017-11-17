@@ -113,7 +113,11 @@ class Resistance:
                     else:
                         the_code.append(the_illset)
         if len(the_code) > 0:
-            return ','.join(the_code)
+            the_list = '，'.join(the_code).split("，")
+            for index,val in enumerate(the_list):
+                if '病' not in val:
+                    the_list[index] = the_list[index]+"病"
+            return '，'.join(the_list)
         else:
             return "无"
 
@@ -304,8 +308,8 @@ class Seed_nature:
 
 
 if __name__ == "__main__":
-    # the_obj = Resistance('''抗病性鉴定，秆锈病免疫，中感叶锈病和根腐病，高感赤霉病和白粉病。''')  #
-    # print(the_obj.get_feature_dict())
+    the_obj = Resistance('''中感白粉病、条锈病和叶枯病，中抗叶锈和纹枯病''')  #
+    print(the_obj.get_feature_dict())
 
     # print(the_obj.the_feature_dict)
 
@@ -321,6 +325,6 @@ if __name__ == "__main__":
 
     # print(get_spike_length_feature("穗层厚，穗大码稀，穗匀。"))
 
-    words = pseg.cut("株型半松散，基部节间短，茎秆弹性好")
-    for word, flag in words:
-        print('%s %s' % (word, flag))
+    # words = pseg.cut("株型半松散，基部节间短，茎秆弹性好")
+    # for word, flag in words:
+    #     print('%s %s' % (word, flag))
