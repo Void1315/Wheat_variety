@@ -6,7 +6,8 @@ if __name__ == "__main__":
 	the_obj = setModel.SetModel()
 	my_link = MyLink()
 	my_sql = "panicle_num,grain_num,ths_weight,protein,wet_gluten,ecology_type,seed_nature,tiler_nature,spike_length"
-	str_list = ["感叶锈病","感白粉病","感条锈病"]
+	str_list = setModel.get_all_ill()
+	print(str_list)
 	list_ = []
 	for val in str_list:
 		my_list = my_link.get_cloud_with_id(my_sql, tuple(the_obj.get_ill_id(val)))

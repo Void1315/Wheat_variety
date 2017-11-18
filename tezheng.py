@@ -4,8 +4,6 @@ str_ = '''抗病性鉴定，秆锈病免疫，高抗叶锈病，中感赤霉病�
 list_ill = []
 
 
-
-
 def get_RecentSymbol(str_):
 	commo = str_.find('，')
 	over = str_.find('。')
@@ -18,9 +16,7 @@ def get_RecentSymbol(str_):
 	else:
 		return commo if commo < over else over
 
-
 list_ = None
-
 
 def split_with(str_, the_feature):
 	global list_ill, list_
@@ -38,7 +34,6 @@ def split_with(str_, the_feature):
 			if val[:len(the_feature)]==val[len(the_feature):len(the_feature)*2]:
 				list_ill[index_] = val[len(the_feature):]
 	return list(set(list_ill))
-
 
 def serchModifiers(str_):
 	the_code = []

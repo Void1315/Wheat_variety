@@ -26,6 +26,14 @@ def cross_validation(fold,list_):
 		sum_ +=nltk.classify.accuracy(classifier, the_list[val])  # 评估分类器
 	print(str(fold)+"倍交叉验证的结果是:\n"+str(sum_/fold))
 
+def get_all_ill(filename = '一个.txt'):
+	the_list = []
+	with open(filename,'r',encoding='utf8') as file_:
+		for i in file_.readlines():
+			the_list.append(i.replace("\n",""))
+	return the_list
+
+
 class SetModel:
 	my_db = MyLink()
 	my_feature = Resistance()
