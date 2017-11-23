@@ -5,12 +5,26 @@ import jieba.posseg as pseg
 jieba.load_userdict("dict/dict_1.txt")
 
 
+"""
+此文件是用来提取特征的,如果像float、int类型的字段就没有提特征的必要
+所以文件是主要为varchar类型字段服务，
+现在能提取特征的字段有：
+其中类文件有：
+Ecology_type
+Seed_nature
+Resistance这个比较特殊，抗病性和免疫性还有抗寒抗旱性
+这些是方法：
+seed_nature,tiler_nature,plant_type,spike_length
+leaf_nature,spike_layer,plant_height,lodging,panicle_type
+root_activ,yellow
+"""
+
+
 def is_number(s):
     """
     :param s:传递一个字符串
     :return: 如果为数字，返回True，否则返回False
     """
-
     try:
         float(s)
         return True
@@ -204,18 +218,6 @@ class Resistance:
         return self.the_feature_dict.copy()
 
 
-    def get_all_feature(self,field,str_):
-        if field == "ecology_type":
-            the_obj = Ecology_type(str_)
-            return ','.join(the_obj.get_ecology_feature())
-        elif field == "seed_nature":
-            return ','.join(get_seed_nature_feature(str_))
-        elif field == "tiler_nature":
-            return ','.join(get_tiler_nature_feature(str_))
-        elif field == "spike_length":
-            return ','.join(get_spike_length_feature(str_))
-        return str_
-
 class Ecology_type:
     '''
         此类表示对ecology字段的分词，
@@ -245,86 +247,102 @@ class Ecology_type:
         if len(the_list) == 0:return [""]
         return list_.copy()
 
-def get_seed_nature_feature(str_):
-    """
-    此方法与get_tiler_nature_feature类似，不在赘述
-    :param str_:
-    :return:
-    """
-    flag_list = ['v','a']
-    words = pseg.cut(str_)
-    the_list = []
-    for word, flag in words:
-        if flag in flag_list:
-            the_list.append(word)
-    if len(the_list)==0:return [""]
-    return the_list.copy()
-
-def get_tiler_nature_feature(str_):
-    """
-    此方法用于获取tiler_nature字段的特征，
-    falg_list列表中存放，我们所需的关键词词性，
-
-    :param str_: 一个tiler_nature字段的值
-    :return: 一个list，里面存放进行词性分割后获取的关系字
-    """
-
-    flag_list = ['b','a']
-    words = pseg.cut(str_)
-    the_list = []
-    for word, flag in words:
-        if flag in flag_list:
-            the_list.append(word)
-    if len(the_list)==0:return [""]
-    return the_list.copy()
-
-
-def get_plant_type_feature(str_):
-    flag_list = ['a']
-    words = pseg.cut(str_)
-    the_list = []
-    for word, flag in words:
-        if flag in flag_list:
-            the_list.append(word)
-    if len(the_list)==0:return [""]
-    return the_list.copy()
-
-def get_spike_length_feature(str_):
-    if str_ is None or len(str_)==0:
-        return [""]
-    the_list = [str_]
-    return the_list.copy()
-
-
-class Seed_nature:
-    str_ = ""
-
-    def __init__(self, str_=""):
+class FeatureManager:
+    flag_list = {   #需要的词性，和不需要的词性，元祖第一个是需要的,空表示没有
+        "seed_nature":(['v','a'],[]),
+        "tiler_nature":(['b','a'],[]),
+        "plant_type":(['a'],[]),
+        "spike_length":([],[]),
+        "leaf_nature":(['a','v','b'],[]),
+        "spike_layer":([],[]),
+        "plant_height":(['m','x','eng'],[]),
+        "lodging":([],['x']),
+        "panicle_type":([],['x']),
+        "root_activ": ([],['x']),
+        "yellow":([],['x'])
+    }
+    str_ = ""   #提取特征的句子
+    field= ""   #特征名字
+    the_list = []   #提取特征后的list
+    def __init__(self,field="",str_=""):
         self.str_ = str_
-
-    def get_seed_feature(self):
-        seg_list = jieba.cut(self.str_, cut_all=True)
-        print("Full Mode: " + "/ ".join(seg_list))  # 全模式
-
+        self.field = field
+        
+    def set_field_str(self,field,str_):
+        self.field = field
+        self.str_ = str_
+    
+    def get_this_feature(self):
+        b_is, val = self.special_features()
+        if b_is:
+            return val
+        
+        if self.not_str_feature():
+            return self.str_
+        return ','.join(self.split_words())
+        
+    def get_set_this_feature(self,field,str_):
+        self.field = field
+        self.str_ = str_
+        return self.get_this_feature()
+    
+    def split_words(self):
+        self.the_list = []
+        if self.str_ is None or len(self.str_)==0:
+            return [""]
+        words = pseg.cut(self.str_)
+        for word, flag in words:
+            if flag  in self.flag_list[self.field][1]:
+                continue
+            if len(self.flag_list[self.field][0])==0:#全模式
+                self.the_list.append(word)
+            else:
+                if flag in self.flag_list[self.field][0]:
+                    self.the_list.append(word)
+        return self.the_list
+    
+    def not_str_feature(self):
+        if self.field not in self.flag_list:
+            return True
+        else:
+            return False
+    
+    def special_features(self):
+        if self.field == "ecology_type":
+            the_obj = Ecology_type(self.str_)
+            return True,','.join(the_obj.get_ecology_feature())
+        else:
+            return False,""
 
 if __name__ == "__main__":
-    the_obj = Resistance('''中感白粉病、条锈病和叶枯病，中抗叶锈和纹枯病''')  #
-    print(the_obj.get_feature_dict())
+    # the_obj = Resistance('''中感白粉病、条锈病和叶枯病，中抗叶锈和纹枯病''')  #
+    # print(the_obj.get_feature_dict())
 
     # print(the_obj.the_feature_dict)
 
     # the_obj_E = Ecology_type("属弱春性多穗型早熟品种，平均全生育期229.3天")
     # print(the_obj_E.get_ecology_feature())
 
-    # the_obj = Seed_nature("幼苗直立，苗势壮，叶短宽、浓绿色，耐寒性较好")
-    # the_obj.get_seed_feature()
 
     # print(get_seed_nature_feature("幼苗半直立，叶色青绿，长势偏旺，冬季抗寒能力差"))
 
     # print(get_tiler_nature_feature("分蘖力较弱，成穗率较高，成穗数中等。春季起身较早，两极分化较快，抽穗早。"))
 
-    # print(get_spike_length_feature("穗层厚，穗大码稀，穗匀。"))
+    # print(get_spike_length_feature("穗下节长"))
 
-    # words = pseg.cut("株型半松散，基部节间短，茎秆弹性好")
+    # print(get_leaf_nature_feature("成株期旗叶及下部叶片较大"))
+    
+    # print(get_plant_height_feature("株高78+80cm"))
+    
+    # print(get_lodging_feature("茎秆蜡质厚,茎秆弹性一般,抗倒能力中等"))
+    
+    # print(get_panicle_type_feature("纺锤形大穗,短芒,白壳,白粒,大小较匀,半角质,饱满度较好,黑胚率高"))
+    
+    # print(get_root_activ_feature("根系活力强，后期叶功能好，耐高温"))
+    
+    the_obj = FeatureManager('spike_length','穗下节长')
+    print(the_obj.get_this_feature())
+    # words = pseg.cut("茎秆蜡质厚,茎秆弹性一般,抗倒能力中等")
     # for word, flag in words:
     #     print('%s %s' % (word, flag))
+    pass

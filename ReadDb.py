@@ -1,6 +1,7 @@
 import pymysql, pprint
 import re
 from Resistance import Resistance
+from Resistance import FeatureManager
 
 def get_tuple(tuple_):
 	if len(tuple_) == 1 and type(tuple_[0]) == tuple:
@@ -42,14 +43,14 @@ class MyLink:
 	def get_cloud_with_id(self, cloud, *arg):
 		"""
 		根据传递的列名和id值返回结果
-		返回单列
+		返回单列,并在此提取了特征，通过在构造dict时
 		:param cloud: 接受查询的列
 		:param arg: 用于接收id元祖，可以传递（19,55,45）形式也可以传递15,54,56
 		:return:返回一个键值对dict 比如{'grain_num': 41.2, 'panicle_num': 41.2, 'ths_weight': 41.2}
 		"""
 		arg = get_tuple(arg)
 		the_list = []
-		obj_resistance = Resistance()
+		obj_featuremanager = FeatureManager()
 		the_sql = "SELECT " + cloud + " FROM wheat_attr WHERE id IN " + str(arg)
 		with self.link.cursor() as cursor:
 			if len(arg)==0:
@@ -57,7 +58,7 @@ class MyLink:
 			cursor.execute(the_sql)
 			result = cursor.fetchall()
 			for val in result:
-				the_list.append({v:obj_resistance.get_all_feature(v,k) for v,k in zip(cloud.split(","),val)})
+				the_list.append({v:obj_featuremanager.get_set_this_feature(v,k) for v,k in zip(cloud.split(","),val)})
 		return the_list
 
 
@@ -72,7 +73,6 @@ if __name__ == "__main__":
 		resistance_.str_ = val
 		print(resistance_.get_feature_dict())
 		the_ill = resistance_.get_feature_dict()["抗病性"].replace(",","，")
-
 		the_ill = the_ill.split("，")
 		if '中抗叶锈' in the_ill:
 			print(id)

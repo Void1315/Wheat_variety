@@ -2,18 +2,26 @@ import sys
 import setModel
 import nltk, pprint, random
 from ReadDb import MyLink
+
+def get_ill():
+	the_list = []
+	with open('一个.txt','r',encoding='utf8') as f:
+		for line in f.readlines():
+			the_list.append(line.replace("\n","")[-3:])
+	return list(set(the_list))
+
 if __name__ == "__main__":
 	the_obj = setModel.SetModel()
 	my_link = MyLink()
 	my_sql = "panicle_num,grain_num,ths_weight,protein,wet_gluten,ecology_type,seed_nature,tiler_nature,spike_length"
-	str_list = setModel.get_all_ill()
+	str_list = get_ill()
 	print(str_list)
 	list_ = []
 	for val in str_list:
 		my_list = my_link.get_cloud_with_id(my_sql, tuple(the_obj.get_ill_id(val)))
 		list_ += [(j, val) for j in my_list]
 	random.shuffle(list_)
-	# pprint.pprint(list_[:5])
+	# pprint.pprint(list_)
 	classifier = nltk.NaiveBayesClassifier.train(list_)#生成分类器
 	# print(nltk.classify.accuracy(classifier,list_[:5]))#评估分类器
 	setModel.cross_validation(10,list_)
