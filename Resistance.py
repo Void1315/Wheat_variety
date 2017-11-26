@@ -259,34 +259,66 @@ class FeatureManager:
         "lodging":([],['x']),
         "panicle_type":([],['x']),
         "root_activ": ([],['x']),
-        "yellow":([],['x'])
+        "yellow":([],['x']),
+        "yield_result":([],['n','x']),
+        "tech_point":([],['x'])
+        
     }
     str_ = ""   #提取特征的句子
     field= ""   #特征名字
     the_list = []   #提取特征后的list
     def __init__(self,field="",str_=""):
+        """
+        可以通过构造函数，把提取特征的标签，和标签值初始化了
+        :param field: 标签
+        :param str_: 值
+        """
         self.str_ = str_
         self.field = field
         
     def set_field_str(self,field,str_):
+        """
+        如果你错过了构造函数，没关系我们有set方法，
+        可以让你重新对标签和值进行设置
+        :param field:标签
+        :param str_:值
+        :return:没有返回值
+        """
         self.field = field
         self.str_ = str_
     
     def get_this_feature(self):
+        """
+        
+        :return: 通过预先设定好的标签和值，我们来提取这句话对应的特征，
+        返回一个string
+        """
         b_is, val = self.special_features()
         if b_is:
             return val
-        
         if self.not_str_feature():
             return self.str_
         return ','.join(self.split_words())
         
     def get_set_this_feature(self,field,str_):
+        """
+        如果你在循环中，不想通过构造和，set方法，我们也有办法
+        通过直接设置值，来获得特征语句
+        :param field: 标签
+        :param str_: 值
+        :return: 特征字符串
+        """
         self.field = field
         self.str_ = str_
         return self.get_this_feature()
     
     def split_words(self):
+        """
+        
+        :return: 分词逻辑，我们会用flag_list里面的分词规则，对特征进行提取
+        要知道，如果没有提取词的词性，那么我们会全部提取，
+        如果没有非提取词的词性，那么我们不会舍弃
+        """
         self.the_list = []
         if self.str_ is None or len(self.str_)==0:
             return [""]
@@ -302,21 +334,64 @@ class FeatureManager:
         return self.the_list
     
     def not_str_feature(self):
+        """
+        判断你给我的特征，是否有预设值，如果没有则返回False
+        :return:一个bool值
+        """
         if self.field not in self.flag_list:
             return True
         else:
             return False
     
     def special_features(self):
+        """
+        一些特殊的分词方式，比如复杂的分词如抗病性，
+        
+        :return: 返回值是两个，一个是True必须，另一个是特征字符串
+        """
         if self.field == "ecology_type":
             the_obj = Ecology_type(self.str_)
             return True,','.join(the_obj.get_ecology_feature())
+        elif self.field == 'resistance':
+            the_obj = Resistance(self.str_)
+            return True,(the_obj.get_feature_dict()["抗病性"])
         else:
             return False,""
 
+class SetDictFeature(FeatureManager):
+    """
+    此类是继承了FeatureManager，是为了更方便的提取特征，
+    我们用这个类是为了直接从dict中提取特征，
+    一般适用于用户直接给我预测数据，然后我们稍加处理
+    """
+    dict_ = {}
+    def __init__(self,dict_):
+        """
+        :param dict_: 必须传入一个dict类型
+        """
+        self.dict_ = dict_
+    def set_model(self):
+        """
+        通过父类提取特征
+        :return: 一个dict，不过是全部提取好特征的
+        """
+        the_dict = {}
+        for index in self.dict_:
+            the_dict[index] = self.get_set_this_feature(index,self.dict_[index])
+        return the_dict
 if __name__ == "__main__":
-    # the_obj = Resistance('''中感白粉病、条锈病和叶枯病，中抗叶锈和纹枯病''')  #
+    the_dict = {'panicle_num': 47, 'grain_num': 47, 'ths_weight': 48 , 'protein':15.0, 'wet_gluten':30.0
+                               ,'ecology_type' : "半冬性，全生育期239天，与对照品种洛旱7号相当。",
+                               "seed_nature": "幼苗直立，苗势壮，冬季耐寒性较好",
+                               "tiler_nature":"分蘖力强。",
+                               "spike_length":"穗下节短"}
+    
+    
+    # the_obj = Resistance('''中抗秆锈病、叶锈病和白粉病''')  #
     # print(the_obj.get_feature_dict())
+
+    the_obj = SetDictFeature(the_dict)
+    the_obj.set_model()
 
     # print(the_obj.the_feature_dict)
 
@@ -340,9 +415,13 @@ if __name__ == "__main__":
     
     # print(get_root_activ_feature("根系活力强，后期叶功能好，耐高温"))
     
-    the_obj = FeatureManager('spike_length','穗下节长')
-    print(the_obj.get_this_feature())
-    # words = pseg.cut("茎秆蜡质厚,茎秆弹性一般,抗倒能力中等")
+    # str_ = """
+    # 茎秆蜡质厚,茎秆弹性一般,抗倒能力中等
+    # """
+    #
+    # the_obj = FeatureManager('lodging',str_)
+    # print(the_obj.get_this_feature())
+    # words = pseg.cut(str_)
     # for word, flag in words:
     #     print('%s %s' % (word, flag))
     pass
