@@ -72,6 +72,7 @@ def split_ill(str_, the_feature):
 class Resistance:
     the_feature_dict = {
         "抗病性": "无",
+        "感病性": "无",
         "免疫性": '无',
         "抗旱性": "无",
         "抗寒性": "无"
@@ -131,10 +132,25 @@ class Resistance:
             for index,val in enumerate(the_list):
                 if '病' not in val:
                     the_list[index] = the_list[index]+"病"
-            return '，'.join(the_list)
+            return ','.join(the_list)
         else:
             return "无"
 
+    def get_disill(self,list_):
+        the_list = []
+        for val in list_:
+            if "抗" in val:
+                the_list.append(val)
+        return the_list
+    
+    def get_illlist(self,list_):
+        the_list = []
+        for val in list_:
+            if "抗" not in val :
+                the_list.append(val)
+        return the_list
+    
+    
     def get_immune(self):
         """
         获得免疫特征，
@@ -203,14 +219,17 @@ class Resistance:
         由键值对给出
             the_feature_dict = {
             "抗病性": "无",
+            "感病性": "无",
             "免疫性": '无',
             "抗旱性": "无",
             "抗寒性": "无"
             }
         :return:一个字典
         """
-
-        self.the_feature_dict["抗病性"] = (self.get_ill())
+        ill_list = self.get_ill().split(',')
+        
+        self.the_feature_dict["抗病性"] = ','.join(self.get_disill(ill_list))
+        self.the_feature_dict["感病性"] = ','.join(self.get_illlist(ill_list))
         self.list_ill = []
         self.the_feature_dict["免疫性"] = (self.get_immune())
         self.the_feature_dict["抗旱性"] = (self.get_natural("旱"))
@@ -387,11 +406,11 @@ if __name__ == "__main__":
                                "spike_length":"穗下节短"}
     
     
-    # the_obj = Resistance('''中抗秆锈病、叶锈病和白粉病''')  #
-    # print(the_obj.get_feature_dict())
+    the_obj = Resistance('''高抗条绣病，高感叶锈病、白粉病、赤霉病、纹枯病。''')  #
+    print(the_obj.get_feature_dict())
 
-    the_obj = SetDictFeature(the_dict)
-    the_obj.set_model()
+    # the_obj = SetDictFeature(the_dict)
+    # the_obj.set_model()
 
     # print(the_obj.the_feature_dict)
 

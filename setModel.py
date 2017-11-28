@@ -1,6 +1,7 @@
 import nltk, pprint, random
 from Resistance import Resistance
 from ReadDb import MyLink
+from Resistance import FeatureManager
 
 def cross_validation(fold,list_):
     """
@@ -49,12 +50,64 @@ class SetModel:
     my_db = MyLink()
     my_feature = Resistance()
     the_list = []
+    field_list = [
+        "ecology_type",
+        "seed_nature",
+        "tiler_nature",
+        "plant_type",
+        "spike_length",
+        "leaf_nature",
+        "spike_layer",
+        "plant_height",
+        "lodging",
+        "panicle_type",
+        "root_activ",
+        "yellow",
+        "panicle_num",
+        "grain_num",
+        "ths_weight",
+        "resistance",
+        "protein",
+        "volume",
+        "wet_gluten",
+        "fall_num",
+        "precipitate",
+        "water_uptake",
+        "format_time",
+        "steady_time",
+        "weaken",
+        "hardness",
+        "white",
+        "powder",
+        "yield_result",
+        "tech_point"
+    ]   #   数据库字段，通过这些查询原始数据
     def __init__(self):
         """
         通过构造函数，我们从数据库读出来这个字段数据，和ID 并把它们
         变成一个list里面很多元祖，来生成特征集
         """
         pass
+    
+    def get_cloud_with_id(self,sql_link,id,field_list = None):
+        """
+        通过id查询数据原始数据
+        我们查询的是field_list里面的字段
+        :param field_list:默认为self.field_list，通过这里面的字段进行查询
+        :param sql_link: 一个数据库连接，通过这个链接查询
+        :param id: int型的主建
+        :return:返回一个键值对dict 比如{'grain_num': 41.2, 'panicle_num': 41.2, 'ths_weight': 41.2}
+        """
+        if field_list is None:
+            field_list = self.field_list
+        field_str = ",".join(field_list)
+        with sql_link.cursor() as cursor:
+            the_sql = "select "+field_str+" from wheat_attr where id = %s"
+            cursor.execute(the_sql,(id,))
+            sql_link.commit()
+            result = cursor.fetchall()
+        return {field:val for field in field_str.split(',') for val in list(result[0])}
+    
     def get_list(self):
         """
         只是从resistance这个字段获取数据
@@ -88,21 +141,34 @@ class SetModel:
 
 if __name__ == "__main__":
     the_obj = SetModel()
-    my_link = MyLink()
-    my_sql = "panicle_num,grain_num,ths_weight,protein,wet_gluten,ecology_type,seed_nature,tiler_nature,spike_length"
-    str_list = ["感叶锈病","感白粉病","感条锈病"]
-    list_ = []
-    for val in str_list:
-        my_list = my_link.get_cloud_with_id(my_sql, tuple(the_obj.get_ill_id(val)))
-        list_ += [(j, val) for j in my_list]
-    random.shuffle(list_)
-    # pprint.pprint(list_[:5])
-    classifier = nltk.NaiveBayesClassifier.train(list_)#生成分类器
-    # print(nltk.classify.accuracy(classifier,list_[:5]))#评估分类器
-    cross_validation(10,list_)
-    print(classifier.classify({'panicle_num': 47, 'grain_num': 47, 'ths_weight': 48 , 'protein':15.0, 'wet_gluten':30.0
-                               ,'ecology_type' : "半冬性，全生育期239天，与对照品种洛旱7号相当。",
-                               "seed_nature": "幼苗直立，苗势壮，冬季耐寒性较好",
-                               "tiler_nature":"分蘖力强。",
-                               "spike_length":"穗下节短"}))
+    sql_link = MyLink()
+    the_obj.get_cloud_with_id(sql_link.link,15)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    # my_link = MyLink()
+    # my_sql = "panicle_num,grain_num,ths_weight,protein,wet_gluten,ecology_type,seed_nature,tiler_nature,spike_length"
+    # str_list = ["感叶锈病","感白粉病","感条锈病"]
+    # list_ = []
+    # for val in str_list:
+    #     my_list = my_link.get_cloud_with_id(my_sql, tuple(the_obj.get_ill_id(val)))
+    #     list_ += [(j, val) for j in my_list]
+    # random.shuffle(list_)
+    # # pprint.pprint(list_[:5])
+    # classifier = nltk.NaiveBayesClassifier.train(list_)#生成分类器
+    # # print(nltk.classify.accuracy(classifier,list_[:5]))#评估分类器
+    # cross_validation(10,list_)
+    # print(classifier.classify({'panicle_num': 47, 'grain_num': 47, 'ths_weight': 48 , 'protein':15.0, 'wet_gluten':30.0
+    #                            ,'ecology_type' : "半冬性，全生育期239天，与对照品种洛旱7号相当。",
+    #                            "seed_nature": "幼苗直立，苗势壮，冬季耐寒性较好",
+    #                            "tiler_nature":"分蘖力强。",
+    #                            "spike_length":"穗下节短"}))
     # print(classifier.show_most_informative_features(5))#检查似然比
