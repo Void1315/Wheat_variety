@@ -103,10 +103,11 @@ class SetModel:
         field_str = ",".join(field_list)
         with sql_link.cursor() as cursor:
             the_sql = "select "+field_str+" from wheat_attr where id = %s"
-            cursor.execute(the_sql,(id,))
+            # print(the_sql)
+            cursor.execute(the_sql,(int(id),))
             sql_link.commit()
             result = cursor.fetchall()
-        return {field:val for field in field_str.split(',') for val in list(result[0])}
+        return dict(zip(field_list,list(result[0])))
     
     def get_list(self):
         """
@@ -138,11 +139,10 @@ class SetModel:
                 not_list.append(val[1])
         return list_,not_list.copy()
         
-
 if __name__ == "__main__":
     the_obj = SetModel()
     sql_link = MyLink()
-    the_obj.get_cloud_with_id(sql_link.link,15)
+    print(the_obj.get_cloud_with_id(sql_link.link,15))
     
     
     

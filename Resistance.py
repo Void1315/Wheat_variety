@@ -329,6 +329,8 @@ class FeatureManager:
         """
         self.field = field
         self.str_ = str_
+        if str_ is None:
+            self.str_ = ""
         return self.get_this_feature()
     
     def split_words(self):
@@ -384,20 +386,25 @@ class SetDictFeature(FeatureManager):
     一般适用于用户直接给我预测数据，然后我们稍加处理
     """
     dict_ = {}
-    def __init__(self,dict_):
+    def __init__(self,dict_ = None):
         """
         :param dict_: 必须传入一个dict类型
         """
         self.dict_ = dict_
-    def set_model(self):
+    def set_model(self,dict_ = None):
         """
         通过父类提取特征
         :return: 一个dict，不过是全部提取好特征的
         """
+        if dict_ is None and self.dict_ is None:
+            return
+        if dict_ is None and self.dict_  is not None:
+            dict_ = self.dict_.copy()
         the_dict = {}
-        for index in self.dict_:
-            the_dict[index] = self.get_set_this_feature(index,self.dict_[index])
+        for index in dict_:
+            the_dict[index] = self.get_set_this_feature(index,dict_[index])
         return the_dict
+    
 if __name__ == "__main__":
     the_dict = {'panicle_num': 47, 'grain_num': 47, 'ths_weight': 48 , 'protein':15.0, 'wet_gluten':30.0
                                ,'ecology_type' : "半冬性，全生育期239天，与对照品种洛旱7号相当。",

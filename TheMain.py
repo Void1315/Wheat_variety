@@ -11,11 +11,38 @@ def get_ill():
             the_list.append(line.replace("\n","")[-3:])
     return list(set(the_list))
 
-if __name__ == "__main__":
-    from Resistance import Resistance
+def feature_one(str_):
+    """
+    传递一个预测病例，如 条锈病
+    :param str_:病例字符串
+    :return:一个预测模型
+    """
+    setmodel_obj = setModel.SetModel()
+    the_model = SetDictFeature()
     my_link = MyLink()
-    the_obj = Resistance()
-    the_list = my_link.select_resistance()
+    list_ = []
+    in_list,not_list = setmodel_obj.get_ill_id(str_)
+    for id in in_list:
+        list_ += [(the_model.set_model(setmodel_obj.get_cloud_with_id(my_link.link,id)),str_)]
+    for id in not_list:
+        list_ += [(the_model.set_model(setmodel_obj.get_cloud_with_id(my_link.link, id)), "非" + str_)]
+    random.shuffle(list_)
+    print("一共 "+ str(len(list_)) + " 条数据")#总共就72条数据
+    classifier = nltk.NaiveBayesClassifier.train(list_)#生成分类器
+    setModel.cross_validation(10,list_)
+
+    dict_ = {'panicle_num': 47, 'grain_num': 47, 'ths_weight': 48 , 'protein':15.0, 'wet_gluten':30.0
+                               ,'ecology_type' : "半冬性，全生育期239天，与对照品种洛旱7号相当。",
+                               "seed_nature": "幼苗直立，苗势壮，冬季耐寒性较好",
+                               "tiler_nature":"分蘖力强。",
+                               "spike_length":"穗下节短"}
+    the_feature = the_model.set_model(dict_)
+
+    print("\n预测的结果是" + classifier.classify(the_feature))
+
+if __name__ == "__main__":
+    feature_one("白粉病")
+
     
     
     # the_sql = "SELECT DISTINCT wheat_attr.`wheat_id` AS attr,wheat_ill.`wheat_id` " \
@@ -28,12 +55,6 @@ if __name__ == "__main__":
     #         cursor.execute(the_sql,(date[0],date[1]))
     #         my_link.link.commit()
         
-    
-    
-    
-    
-    
-    
     
     
     # for val in the_list:
@@ -67,41 +88,14 @@ if __name__ == "__main__":
         #             the_sql = "INSERT INTO wheat_ill (wheat_id,ill_id,kind) VALUES (%s,%s,%s)"
         #             cursor.execute(the_sql, (int(wheat_id), int(kang_ill_id[0]), gan_val[1]))
         #             my_link.link.commit()
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    the_obj = setModel.SetModel()
-    my_link = MyLink()
-    my_sql = "panicle_num,grain_num,ths_weight,protein,wet_gluten,ecology_type,seed_nature,tiler_nature,spike_length"
-    str_list = get_ill()
-    str_list = ["条锈病"]
-    # print(str_list)
-    list_ = []
-    for val in str_list:
-        in_list,not_list = the_obj.get_ill_id(val)
-        my_list = my_link.get_cloud_with_id(my_sql, tuple(in_list))#此方法通过 含有特征病的id，去找其他数据
-        list_ += [(j, val) for j in my_list]
-        my_list = my_link.get_cloud_with_id(my_sql, tuple(not_list))  # 此方法通过 含有特征病的id，去找其他数据
-        list_ += [(j, "非"+val) for j in my_list]
-    random.shuffle(list_)
-    print("一共 "+ str(len(list_)) + " 条数据")#总共就72条数据
-    classifier = nltk.NaiveBayesClassifier.train(list_)#生成分类器
-    # print(nltk.classify.accuracy(classifier,list_[:5]))#评估分类器
-    setModel.cross_validation(10,list_)
 
-    dict_ = {'panicle_num': 47, 'grain_num': 47, 'ths_weight': 48 , 'protein':15.0, 'wet_gluten':30.0
-                               ,'ecology_type' : "半冬性，全生育期239天，与对照品种洛旱7号相当。",
-                               "seed_nature": "幼苗直立，苗势壮，冬季耐寒性较好",
-                               "tiler_nature":"分蘖力强。",
-                               "spike_length":"穗下节短"}
-    the_feature = SetDictFeature(dict_)
 
-    print("\n预测的结果是" + classifier.classify(the_feature.set_model()))
+
+
+
+
+
+
+
+
     pass
