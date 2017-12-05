@@ -163,7 +163,7 @@ class Resistance:
         else:
             return "无"
         if self.str_[index_ill - 1:index_ill] == "病":
-            the_reul = "[，|。]+.*.病免疫"
+            the_reul = "[，|。]+.？*.病免疫"
             the_model = False
         else:
             the_reul = "免疫*?.*?病[、|和]*?.*?[。|，]"
@@ -413,8 +413,9 @@ if __name__ == "__main__":
                                "spike_length":"穗下节短"}
     
     
-    the_obj = Resistance('''高抗条绣病，高感叶锈病、白粉病、赤霉病、纹枯病。''')  #
-    print(the_obj.get_feature_dict())
+    the_obj = Resistance('''中感赤霉病和根腐病，高感白粉病，慢叶锈病，秆锈病免疫''')  #
+    import  pprint
+    pprint.pprint(the_obj.get_feature_dict())
 
     # the_obj = SetDictFeature(the_dict)
     # the_obj.set_model()

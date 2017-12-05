@@ -21,9 +21,50 @@ class MyLink:
         'db': 'wheat_query',
     }
     link = None  # 我的连接
-
+    field_list = [
+        "id",
+        "wheat_id",
+        "ecology_type",
+        "seed_nature",
+        "tiler_nature",
+        "plant_type",
+        "spike_length",
+        "leaf_nature",
+        "spike_layer",
+        "plant_height",
+        "lodging",
+        "panicle_type",
+        "root_activ",
+        "yellow",
+        "panicle_num",
+        "grain_num",
+        "ths_weight",
+        "resistance",
+        "protein",
+        "volume",
+        "wet_gluten",
+        "fall_num",
+        "precipitate",
+        "water_uptake",
+        "format_time",
+        "steady_time",
+        "weaken",
+        "hardness",
+        "white",
+        "powder",
+        "yield_result",
+        "tech_point"
+    ]   # 字段的所有值
     def __init__(self):
         self.link = pymysql.connect(**self.my_config)
+
+    def check_field(self,field):
+        if ',' in field:
+            list_ = field.split(',')
+            if not set(self.field_list)>set(list_):
+                raise Exception("无此字段值", field)
+        elif field not in self.field_list:
+            raise Exception("无此字段值", field)
 
     def select_resistance(self):
         """
@@ -40,6 +81,49 @@ class MyLink:
                     the_list.append((val[0], val[1]))
         return the_list
 
+    def select_field(self,field):
+        self.check_field(field)
+        the_sql = "SELECT "+field+" FROM wheat_attr"
+        with self.link.cursor() as cursor:
+            cursor.execute(the_sql)
+            result = cursor.fetchall()
+            return result
+        
+    def ill_name_to_id(self,ill_str):
+        """
+        通过病的名称查询id
+        :param ill_str:病的名称
+        :return:int的id值
+        """
+        with self.link.cursor() as cursor:
+            the_sql = "SELECT ill.id FROM ill WHERE ill.NAME like %s "
+            cursor.execute(the_sql, ("%" + ill_str + "%",))
+            return cursor.fetchall()[0][0]
+            
+    def get_ill_id(self, ill_str, ill_kind):
+        """
+        通过传来的病名和特性，比如传来“条锈病”，“感”
+        则返回，具有“（高、低、中）感条锈病”的小麦id和，不具有的小麦id
+        :param ill_str:病的名称
+        :param ill_kind:病的特征（慢、感、抗）
+        :return:两个list，一个是具有的id，一个是不具有的id
+        """
+        with self.link.cursor() as cursor:
+            ill_id = self.ill_name_to_id(ill_str)
+            the_sql = "SELECT wheat_attr.`wheat_id` FROM wheat_attr WHERE wheat_attr.`wheat_id` NOT IN " \
+                      "(SELECT wheat_ill.`wheat_id` FROM wheat_ill WHERE wheat_ill.`ill_id` = %s AND wheat_ill.`kind` LIKE %s)"
+            cursor.execute(the_sql, (ill_id, "%" + ill_kind + "%",))
+            not_in_list = [val[0] for val in cursor.fetchall()]
+            the_sql = "SELECT wheat_ill.`wheat_id` FROM wheat_ill " \
+                      "WHERE wheat_ill.`ill_id` = %s AND wheat_ill.`kind` LIKE %s "
+            cursor.execute(the_sql, (ill_id, "%" + ill_kind + "%",))
+            in_list = [val[0] for val in cursor.fetchall()]
+            return in_list,not_in_list
+
+    def get_attr_with_id(self,id):
+        with self.link.cursor() as cursor:
+            the_sql = ""
+        pass
     # def get_cloud_with_id(self, cloud, *arg):
     #     """
     #     根据传递的列名和id值返回结果

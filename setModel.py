@@ -89,22 +89,22 @@ class SetModel:
         """
         pass
     
-    def get_cloud_with_id(self,sql_link,id,field_list = None):
+    def get_cloud_with_id(self,sql_link,wheat_id,field_list = None):
         """
         通过id查询数据原始数据
         我们查询的是field_list里面的字段
+        :param wheat_id:小麦id
         :param field_list:默认为self.field_list，通过这里面的字段进行查询
         :param sql_link: 一个数据库连接，通过这个链接查询
-        :param id: int型的主建
         :return:返回一个键值对dict 比如{'grain_num': 41.2, 'panicle_num': 41.2, 'ths_weight': 41.2}
         """
         if field_list is None:
             field_list = self.field_list
         field_str = ",".join(field_list)
         with sql_link.cursor() as cursor:
-            the_sql = "select "+field_str+" from wheat_attr where id = %s"
+            the_sql = "select "+field_str+" from wheat_attr where wheat_id = %s"
             # print(the_sql)
-            cursor.execute(the_sql,(int(id),))
+            cursor.execute(the_sql,(int(wheat_id),))
             sql_link.commit()
             result = cursor.fetchall()
         return dict(zip(field_list,list(result[0])))
@@ -139,10 +139,13 @@ class SetModel:
                 not_list.append(val[1])
         return list_,not_list.copy()
         
+
+        
 if __name__ == "__main__":
     the_obj = SetModel()
-    sql_link = MyLink()
-    print(the_obj.get_cloud_with_id(sql_link.link,15))
+    the_obj.get_ill_id_new("条绣病",'感')
+    # sql_link = MyLink()
+    # print(the_obj.get_cloud_with_id(sql_link.link,15))
     
     
     
