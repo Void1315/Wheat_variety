@@ -17,27 +17,15 @@ class SaveFile:
         "panicle_type",
         "root_activ",
         "yellow",
-        "panicle_num",
-        "grain_num",
-        "ths_weight",
         "resistance",
-        "protein",
-        "volume",
-        "wet_gluten",
-        "fall_num",
-        "precipitate",
-        "water_uptake",
-        "format_time",
-        "steady_time",
-        "weaken",
-        "hardness",
-        "white",
-        "powder",
         "yield_result",
         "tech_point"
     ]   # 字段的所有值
     file_dir = "field_dict\\"
     def __init__(self):
+        """
+        生成两个对象，一个是MyLink，另一个是FeatureManager(特征提取器对象)
+        """
         from ReadDb import MyLink
         from Resistance import FeatureManager
         
@@ -45,6 +33,12 @@ class SaveFile:
         self.FeatureObject = FeatureManager()
         
     def save_date(self,file_name,date):
+        """
+        通过字段名字和date数据来更新，保存字典
+        :param file_name:字段名字
+        :param date:数据应为此字段的值得list
+        :return:无
+        """
         with open(self.file_dir + file_name +'.txt','a+',encoding = 'utf8') as f:
             lines = f.readlines()
             the_list = lines.copy()
@@ -61,10 +55,21 @@ class SaveFile:
                         the_list.append(date_val_val)
     
     def get_date(self,field,str_):
+        """
+        获取提取特征后的值
+        :param field:字段名
+        :param str_:数据
+        :return:一个字符串
+        """
         date = self.FeatureObject.get_set_this_feature(field,str_)
         return date
     
     def update_one(self,field):
+        """
+        此方法用于更新某个字段字典
+        :param field: 字段名字
+        :return:无
+        """
         model = self.my_sql.select_field(field)
         date = []
         for val in model:
@@ -72,6 +77,10 @@ class SaveFile:
         self.save_date(field,date)
         
     def update_all(self):
+        """
+        此方法用于更新所有字典
+        :return:无
+        """
         import pprint
         import numpy as np
         model = [list(val) for val in self.my_sql.select_field(','.join(self.field_list))]
