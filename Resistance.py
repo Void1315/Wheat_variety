@@ -413,7 +413,7 @@ if __name__ == "__main__":
                                "spike_length":"穗下节短"}
     
     
-    the_obj = Resistance('''中感赤霉病和根腐病，高感白粉病，慢叶锈病，秆锈病免疫''')  #
+    the_obj = Resistance('''幼苗半直立，分蘖力较强，叶色浅绿，生长势较旺。''')  #
     import  pprint
     pprint.pprint(the_obj.get_feature_dict())
 
@@ -442,13 +442,13 @@ if __name__ == "__main__":
     
     # print(get_root_activ_feature("根系活力强，后期叶功能好，耐高温"))
     
-    # str_ = """
-    # 茎秆蜡质厚,茎秆弹性一般,抗倒能力中等
-    # """
-    #
-    # the_obj = FeatureManager('lodging',str_)
-    # print(the_obj.get_this_feature())
-    # words = pseg.cut(str_)
-    # for word, flag in words:
-    #     print('%s %s' % (word, flag))
+    str_ = """
+    幼苗半直立，分蘖力较强，叶色浅绿，生长势较旺。
+    """
+
+    the_obj = FeatureManager('seed_nature',str_)
+    print(the_obj.get_this_feature())
+    words = pseg.cut(str_.strip())
+    for word, flag in words:
+        print('%s %s' % (word, flag))
     pass

@@ -11,37 +11,69 @@ def get_ill():
             the_list.append(line.replace("\n","")[-3:])
     return list(set(the_list))
 
-def feature_one(str_,kind):
+def set_target(target,method,field = "ill",kind = "",right_kind = "",not_kind = "",
+               db_link = MyLink(),the_model = SetDictFeature(),
+               setmodel_obj = setModel.SetModel()):
+    """
+    :param target:目标分类依据,如 幼苗半匍匐，
+    :param method:动态方法名
+    :param kind:分类的字符串
+    :param field:
+    :param right_kind:正确的分类字符串前缀
+    :param not_kind:错误的 同上
+    :param db_link:ReadDb对象
+    :param the_model:SetDictFeature 对象
+    :param setmodel_obj:setModel.SetModel()
+    :return:一个list,其中已经分好类了
+    """
+    method = getattr(db_link,method)#动态调用方法
+    list_ = []
+    in_list, not_list = method(target,field,kind)  # 这点可以改正为动态调用方法
+    for id in in_list:
+        list_ += [(the_model.set_model(setmodel_obj.get_cloud_with_id(db_link.link, id)),right_kind + kind + target)]
+    for id in not_list:
+        list_ += [(the_model.set_model(setmodel_obj.get_cloud_with_id(db_link.link, id)), not_kind + kind + target)]
+    random.shuffle(list_)
+    return list_
+
+def feature_one(target,field = "ill" , kind = ""):
     """
     传递一个预测病例，如 条锈病
-    :param str_:病例字符串
+    :param target:分类依据 如幼苗匍匐
+    :param field:预测的字段
+    :param kind:针对于病来说的，其他字段不要传值
     :return:一个预测模型
     """
+    
     setmodel_obj = setModel.SetModel()
     the_model = SetDictFeature()
     my_link = MyLink()
-    list_ = []
-    in_list,not_list = my_link.get_ill_id(str_,kind)
-    for id in in_list:
-        list_ += [(the_model.set_model(setmodel_obj.get_cloud_with_id(my_link.link,id)),kind +str_)]
-    for id in not_list:
-        list_ += [(the_model.set_model(setmodel_obj.get_cloud_with_id(my_link.link, id)), "非"+kind + str_)]
-    random.shuffle(list_)
-    print("一共 "+ str(len(list_)) + " 条数据")#总共就72条数据
+    if field is "ill":method = "get_ill_id"
+    else:method = "get_att_id"
+    list_ = set_target(target=target,method=method,kind=kind,not_kind="非",
+                       db_link=my_link,the_model=the_model,setmodel_obj = setmodel_obj,field = field)
+    # print(list_[0])#这个list_里面装的是全部属性的特征
+    # print("一共 "+ str(len(list_)) + " 条数据")#总共就72条数据
     classifier = nltk.NaiveBayesClassifier.train(list_)#生成分类器
     setModel.cross_validation(10,list_)
-
     dict_ = {'panicle_num': 43, 'grain_num': 30, 'ths_weight':42 , 'protein':15, 'wet_gluten':32
                                ,'ecology_type' : "属弱春性中熟强筋品种，全生育期220天。",
-                               "seed_nature": "幼苗直立，苗势壮，叶片短直立，冬季抗寒性较好。",
-                               "tiler_nature":"分蘖力强。",
-                               "spike_length":"穗下节短"}
+                               # "seed_nature": "幼苗匍匐，苗势壮，叶片窄卷曲，叶色浓绿，冬季抗寒性较好。",
+                               "tiler_nature":"东前分蘖力较弱，分蘖成穗率一般，春季起身拔节较迟，两极分化快，耐倒春寒能力中等。",
+                               "spike_length":"",
+                                "resistance":"高抗条绣病，高感叶锈病、白粉病、赤霉病、纹枯病。"}
+    # dict_ = {'panicle_num': 43, 'grain_num': 30, 'ths_weight':42 , 'protein':15, 'wet_gluten':32
+    #                            ,'ecology_type' : "属弱春性中熟强筋品种，全生育期220天。",
+    #                            # "seed_nature": "幼苗直立，苗势壮，叶片短直立，冬季抗寒性较好。",
+    #                            "tiler_nature":"分蘖力强。",
+    #                            "spike_length":"穗下节短"}
     the_feature = the_model.set_model(dict_)
-
+    # print(the_feature)
     print("\n预测的结果是" + classifier.classify(the_feature))
 
 if __name__ == "__main__":
-    feature_one("白粉病","感")
+    # feature_one("白粉病","感",field = "ill")
+    feature_one("幼苗匍匐", field="seed_nature")
 
     
     
