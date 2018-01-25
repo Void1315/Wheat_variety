@@ -147,6 +147,25 @@ class MyLink:
         with self.link.cursor() as cursor:
             the_sql = ""
         pass
+
+    def get_cloud_with_id(self, wheat_id, field_list=None):
+        """
+        通过id查询数据原始数据
+        我们查询的是field_list里面的字段
+        :param wheat_id:小麦id
+        :param field_list:默认为self.field_list，通过这里面的字段进行查询
+        :return:返回一个键值对dict 比如{'grain_num': 41.2, 'panicle_num': 41.2, 'ths_weight': 41.2}
+        """
+        if field_list is None:
+            field_list = self.field_list[2:]
+        field_str = ",".join(field_list)
+        with self.link.cursor() as cursor:
+            the_sql = "select " + field_str + " from wheat_attr where wheat_id = %s"
+            cursor.execute(the_sql, (int(wheat_id),))
+            self.link.commit()
+            result = cursor.fetchall()
+        return dict(zip(field_list, list(result[0])))
+    
     # def get_cloud_with_id(self, cloud, *arg):
     #     """
     #     根据传递的列名和id值返回结果

@@ -1,4 +1,3 @@
-import sys
 import setModel
 import nltk, pprint, random
 from ReadDb import MyLink
@@ -11,10 +10,10 @@ def get_ill():
             the_list.append(line.replace("\n","")[-3:])
     return list(set(the_list))
 
-def set_target(target,method,field = "ill",kind = "",right_kind = "",not_kind = "",
-               db_link = MyLink(),the_model = SetDictFeature(),
-               setmodel_obj = setModel.SetModel()):
+def set_target(target, method, field="ill", kind="", right_kind="", not_kind="", db_link=MyLink(),
+               the_model=SetDictFeature()):
     """
+    :param setmodel_obj:
     :param target:目标分类依据,如 幼苗半匍匐，
     :param method:动态方法名
     :param kind:分类的字符串
@@ -23,16 +22,15 @@ def set_target(target,method,field = "ill",kind = "",right_kind = "",not_kind = 
     :param not_kind:错误的 同上
     :param db_link:ReadDb对象
     :param the_model:SetDictFeature 对象
-    :param setmodel_obj:setModel.SetModel()
     :return:一个list,其中已经分好类了
     """
     method = getattr(db_link,method)#动态调用方法
     list_ = []
     in_list, not_list = method(target,field,kind)  # 这点可以改正为动态调用方法
     for id in in_list:
-        list_ += [(the_model.set_model(setmodel_obj.get_cloud_with_id(db_link.link, id)),right_kind + kind + target)]
+        list_ += [(the_model.set_model(db_link.get_cloud_with_id(id)),right_kind + kind + target)]
     for id in not_list:
-        list_ += [(the_model.set_model(setmodel_obj.get_cloud_with_id(db_link.link, id)), not_kind + kind + target)]
+        list_ += [(the_model.set_model(db_link.get_cloud_with_id(id)), not_kind + kind + target)]
     random.shuffle(list_)
     return list_
 
@@ -44,16 +42,12 @@ def feature_one(target,field = "ill" , kind = ""):
     :param kind:针对于病来说的，其他字段不要传值
     :return:一个预测模型
     """
-    
-    setmodel_obj = setModel.SetModel()
     the_model = SetDictFeature()
     my_link = MyLink()
     if field is "ill":method = "get_ill_id"
     else:method = "get_att_id"
     list_ = set_target(target=target,method=method,kind=kind,not_kind="非",
-                       db_link=my_link,the_model=the_model,setmodel_obj = setmodel_obj,field = field)
-    # print(list_[0])#这个list_里面装的是全部属性的特征
-    # print("一共 "+ str(len(list_)) + " 条数据")#总共就72条数据
+                       db_link=my_link,the_model=the_model,field = field)
     classifier = nltk.NaiveBayesClassifier.train(list_)#生成分类器
     setModel.cross_validation(10,list_)
     dict_ = {'panicle_num': 43, 'grain_num': 30, 'ths_weight':42 , 'protein':15, 'wet_gluten':32
